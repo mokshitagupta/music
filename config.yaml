@@ -1,0 +1,10 @@
+data_dir: data/tokenized
+save_path: model.pt
+output_path: output.mid
+vocab_size: 5120
+seq_len: 128
+batch_size: 8
+epochs: 10
+lr: 0.001
+generate_len: 256
+itos: itos.txt
