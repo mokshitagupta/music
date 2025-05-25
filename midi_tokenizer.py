@@ -30,15 +30,22 @@ def build_vocab(token_lists):
     stoi = {tok: i for i, tok in itos.items()}
     return stoi, itos
 
-def tokenize_all(midi_dir, output_dir):
+def tokenize_all(midi_root, output_dir):
     os.makedirs(output_dir, exist_ok=True)
-    for fname in os.listdir(midi_dir):
-        print("lol")
-        if fname.endswith(".mid") or fname.endswith(".midi"):
-            print("lo2")
-            tokens = encode(os.path.join(midi_dir, fname))
-            with open(os.path.join(output_dir, fname + ".txt"), 'w') as f:
-                f.write(" ".join(map(str, tokens)))
+    for root, _, files in os.walk(midi_root):
+        for fname in files:
+            if fname.endswith(".mid") or fname.endswith(".midi"):
+                midi_path = os.path.join(root, fname)
+                try:
+                    tokens = encode(midi_path)
+                    rel_path = os.path.relpath(midi_path, midi_root)
+                    out_path = os.path.join(output_dir, rel_path.replace(".midi", ".txt")).replace(".mid", ".txt")
+                    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+                    with open(out_path, 'w') as f:
+                        f.write(" ".join(map(str, tokens)))
+                except Exception as e:
+                    print(f"Failed to tokenize {midi_path}: {e}")
+
 
 
 if __name__ == "__main__":

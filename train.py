@@ -42,3 +42,31 @@ for epoch in range(cfg["epochs"]):
 
     print(f"Epoch {epoch} Loss: {loss.item():.4f}")
     torch.save(model.state_dict(), cfg["save_path"])
+
+
+def train():
+    with open("config.yaml") as f:
+        cfg = yaml.safe_load(f)
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    dataset = MIDIDataset(cfg["data_dir"])
+    dataloader = DataLoader(dataset, batch_size=cfg["batch_size"], shuffle=True)
+
+    model = MusicTransformer(cfg["vocab_size"]).to(device)
+    optimizer = torch.optim.Adam(model.parameters(), lr=cfg["lr"])
+
+    for epoch in range(cfg["epochs"]):
+        for x, y in dataloader:
+            x, y = x.to(device), y.to(device)
+            logits = model(x)
+            loss = F.cross_entropy(logits.view(-1, logits.size(-1)), y.view(-1))
+
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
+        print(f"Epoch {epoch} Loss: {loss.item():.4f}")
+        torch.save(model.state_dict(), cfg["save_path"])
+
+if __name__ == "__main__":
+    train()
